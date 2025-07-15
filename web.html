@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowdfunding para David</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .hero-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .amount-display {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .amount-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .amount-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 16px;
+            animation: countUp 1s ease-out;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            width: 0%;
+            animation: fillProgress 2s ease-out 0.8s forwards;
+        }
+
+        @keyframes fillProgress {
+            to { width: var(--progress-width); }
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .add-money-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .add-money-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .add-money-btn:active {
+            transform: translateY(0);
+        }
+
+        .contributors {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        .contributors-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+
+        .contributor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .contributor-item:last-child {
+            border-bottom: none;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .contributor-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .contributor-amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 32px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #1e293b;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .amount-value {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="floating-shapes">
+            <div class="shape">💰</div>
+            <div class="shape">❤️</div>
+            <div class="shape">🌟</div>
+        </div>
+        
+        <div class="hero-icon">💝</div>
+        
+        <h1 class="title">Crowdfunding para David</h1>
+        <p class="subtitle">Tu ayuda hace la diferencia. Cada contribución cuenta.</p>
+        
+        <div class="amount-display">
+            <div class="amount-label">Total recaudado</div>
+            <div class="amount-value" id="totalAmount">0€</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="contributorCount">0</span> contribuyentes • Objetivo: 200€ 
+            </div>
+        </div>
+        
+        <button class="add-money-btn" onclick="openModal()">
+            ✨ Añadir dinero
+        </button>
+        
+        <div class="contributors" id="contributorsList">
+            <div class="contributors-title">Últimas contribuciones</div>
+            <div style="color: #64748b; font-style: italic; padding: 20px 0;">
+                Sé el primero en contribuir
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title">Hacer una donación</h2>
+            <form id="donationForm">
+                <div class="form-group">
+                    <label class="form-label" for="donorName">Tu nombre</label>
+                    <input type="text" id="donorName" class="form-input" required placeholder="Introduce tu nombre">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="donationAmount">Cantidad (€)</label>
+                    <input type="number" id="donationAmount" class="form-input" min="1" required placeholder="0">
+                </div>
+                <button type="submit" class="submit-btn">💝 Confirmar donación</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let totalAmount = 0;
+        let contributors = [];
+        let contributorCount = 0;
+
+        function openModal() {
+            document.getElementById('donationModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('donationModal').style.display = 'none';
+            document.getElementById('donationForm').reset();
+        }
+
+        function updateDisplay() {
+            const totalAmountElement = document.getElementById('totalAmount');
+            const contributorCountElement = document.getElementById('contributorCount');
+            const progressFill = document.getElementById('progressFill');
+            
+            // Animación del contador
+            const currentAmount = parseInt(totalAmountElement.textContent);
+            const increment = Math.ceil((totalAmount - currentAmount) / 20);
+            
+            if (currentAmount < totalAmount) {
+                totalAmountElement.textContent = Math.min(currentAmount + increment, totalAmount) + '€';
+                setTimeout(updateDisplay, 50);
+            } else {
+                totalAmountElement.textContent = totalAmount + '€';
+            }
+            
+            contributorCountElement.textContent = contributorCount;
+            
+            // Actualizar barra de progreso (ejemplo: objetivo de 1000€)
+            const goal = 1000;
+            const progressPercentage = Math.min((totalAmount / goal) * 100, 100);
+            progressFill.style.setProperty('--progress-width', progressPercentage + '%');
+        }
+
+        function addContributor(name, amount) {
+            contributors.unshift({ name, amount });
+            contributorCount++;
+            totalAmount += amount;
+            
+            updateContributorsList();
+            updateDisplay();
+        }
+
+        function updateContributorsList() {
+            const contributorsList = document.getElementById('contributorsList');
+            
+            if (contributors.length === 0) {
+                contributorsList.innerHTML = `
+                    <div class="contributors-title">Últimas contribuciones</div>
+                    <div style="color: #64748b; font-style: italic; padding: 20px 0;">
+                        Sé el primero en contribuir
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="contributors-title">Últimas contribuciones</div>';
+            contributors.slice(0, 5).forEach((contributor, index) => {
+                html += `
+                    <div class="contributor-item" style="animation-delay: ${index * 0.1}s">
+                        <span class="contributor-name">${contributor.name}</span>
+                        <span class="contributor-amount">${contributor.amount}€</span>
+                    </div>
+                `;
+            });
+            
+            contributorsList.innerHTML = html;
+        }
+
+        document.getElementById('donationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('donorName').value;
+            const amount = parseInt(document.getElementById('donationAmount').value);
+            
+            if (name && amount > 0) {
+                addContributor(name, amount);
+                closeModal();
+                
+                // Mostrar mensaje de agradecimiento
+                const button = document.querySelector('.add-money-btn');
+                const originalText = button.textContent;
+                button.textContent = '¡Gracias por tu donación! 🎉';
+                button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                }, 3000);
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('donationModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Inicializar la pantalla
+        updateDisplay();
+    </script>
+</body>
+</html>
