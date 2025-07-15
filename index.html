@@ -420,184 +420,185 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Configuración de Supabase
-        const SUPABASE_URL = 'https://doenqhcycdergozzazyo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZW5xaGN5Y2RlcmdvenphenlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODU0NTIsImV4cCI6MjA2ODE2MTQ1Mn0.tkbNNXJ87MKC23uGqVY6Rre_7eCDy1tCxKO8FkYn7fY';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        let totalAmount = 0;
-        let contributors = [];
-        let contributorCount = 0;
+// Configuración de Supabase
+const SUPABASE_URL = 'https://doenqhcycdergozzazyo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZW5xaGN5Y2RlcmdvenphenlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODU0NTIsImV4cCI6MjA2ODE2MTQ1Mn0.tkbNNXJ87MKC23uGqVY6Rre_7eCDy1tCxKO8FkYn7fY';
 
-        // Cargar donaciones desde Supabase
-        async function loadDonations() {
-            try {
-                const { data, error } = await supabase
-                    .from('donations')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+// Usa window.Supabase con la v2 de supabase-js por CDN
+const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                if (error) {
-                    console.error('Error cargando donaciones:', error);
-                    showError('Error cargando las donaciones');
-                    return;
-                }
+let totalAmount = 0;
+let contributors = [];
+let contributorCount = 0;
 
-                contributors = data || [];
-                contributorCount = contributors.length;
-                totalAmount = contributors.reduce((sum, contributor) => sum + contributor.amount, 0);
-                
-                updateContributorsList();
-                updateDisplay();
-            } catch (err) {
-                console.error('Error conectando con Supabase:', err);
-                showError('Error de conexión');
-            }
+// Cargar donaciones desde Supabase
+async function loadDonations() {
+    try {
+        const { data, error } = await supabase
+            .from('donations')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error cargando donaciones:', error);
+            showError('Error cargando las donaciones');
+            return;
         }
 
-        // Guardar donación en Supabase
-        async function saveDonation(donorName, amount) {
-            try {
-                const { data, error } = await supabase
-                    .from('donations')
-                    .insert([
-                        { donor_name: donorName, amount: amount }
-                    ])
-                    .select();
+        contributors = data || [];
+        contributorCount = contributors.length;
+        totalAmount = contributors.reduce((sum, contributor) => sum + (contributor.amount || 0), 0);
 
-                if (error) {
-                    console.error('Error guardando donación:', error);
-                    showError('Error al guardar la donación');
-                    return false;
-                }
+        updateContributorsList();
+        updateDisplay();
+    } catch (err) {
+        console.error('Error conectando con Supabase:', err);
+        showError('Error de conexión');
+    }
+}
 
-                return true;
-            } catch (err) {
-                console.error('Error conectando con Supabase:', err);
-                showError('Error de conexión');
-                return false;
-            }
+// Guardar donación en Supabase
+async function saveDonation(donorName, amount) {
+    try {
+        const { data, error } = await supabase
+            .from('donations')
+            .insert([
+                { donor_name: donorName, amount: amount }
+            ])
+            .select();
+
+        if (error) {
+            console.error('Error guardando donación:', error);
+            showError('Error al guardar la donación');
+            return false;
         }
 
-        function showError(message) {
-            const contributorsList = document.getElementById('contributorsList');
-            contributorsList.innerHTML = `
-                <div class="contributors-title">Error</div>
-                <div style="color: #ef4444; padding: 20px 0;">
-                    ${message}
-                </div>
-            `;
+        return true;
+    } catch (err) {
+        console.error('Error conectando con Supabase:', err);
+        showError('Error de conexión');
+        return false;
+    }
+}
+
+function showError(message) {
+    const contributorsList = document.getElementById('contributorsList');
+    contributorsList.innerHTML = `
+        <div class="contributors-title">Error</div>
+        <div style="color: #ef4444; padding: 20px 0;">
+            ${message}
+        </div>
+    `;
+}
+
+function openModal() {
+    document.getElementById('donationModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('donationModal').style.display = 'none';
+    document.getElementById('donationForm').reset();
+}
+
+function updateDisplay() {
+    const totalAmountElement = document.getElementById('totalAmount');
+    const contributorCountElement = document.getElementById('contributorCount');
+    const progressFill = document.getElementById('progressFill');
+    
+    // Animación del contador
+    const currentAmount = parseInt(totalAmountElement.textContent);
+    const increment = Math.ceil((totalAmount - currentAmount) / 20);
+
+    if (currentAmount < totalAmount) {
+        totalAmountElement.textContent = Math.min(currentAmount + increment, totalAmount) + '€';
+        setTimeout(updateDisplay, 50);
+    } else {
+        totalAmountElement.textContent = totalAmount + '€';
+    }
+
+    contributorCountElement.textContent = contributorCount;
+
+    // Actualizar barra de progreso (objetivo: 200€)
+    const goal = 200;
+    const progressPercentage = Math.min((totalAmount / goal) * 100, 100);
+    progressFill.style.setProperty('--progress-width', progressPercentage + '%');
+}
+
+function updateContributorsList() {
+    const contributorsList = document.getElementById('contributorsList');
+
+    if (contributors.length === 0) {
+        contributorsList.innerHTML = `
+            <div class="contributors-title">Últimas contribuciones</div>
+            <div style="color: #64748b; font-style: italic; padding: 20px 0;">
+                Sé el primero en contribuir
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div class="contributors-title">Últimas contribuciones</div>';
+    contributors.slice(0, 5).forEach((contributor, index) => {
+        html += `
+            <div class="contributor-item" style="animation-delay: ${index * 0.1}s">
+                <span class="contributor-name">${contributor.donor_name}</span>
+                <span class="contributor-amount">${contributor.amount}€</span>
+            </div>
+        `;
+    });
+
+    contributorsList.innerHTML = html;
+}
+
+document.getElementById('donationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('donorName').value;
+    const amount = parseInt(document.getElementById('donationAmount').value);
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (name && amount > 0) {
+        // Deshabilitar botón mientras se procesa
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Procesando...';
+
+        // Guardar en Supabase
+        const success = await saveDonation(name, amount);
+
+        if (success) {
+            closeModal();
+
+            // Recargar donaciones
+            await loadDonations();
+
+            // Mostrar mensaje de agradecimiento
+            const button = document.getElementById('addMoneyBtn');
+            const originalText = button.textContent;
+            button.textContent = '¡Gracias por tu donación! 🎉';
+            button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            }, 3000);
         }
 
-        function openModal() {
-            document.getElementById('donationModal').style.display = 'block';
-        }
+        // Rehabilitar botón
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💝 Confirmar donación';
+    }
+});
 
-        function closeModal() {
-            document.getElementById('donationModal').style.display = 'none';
-            document.getElementById('donationForm').reset();
-        }
+// Cerrar modal al hacer clic fuera
+window.onclick = function(event) {
+    const modal = document.getElementById('donationModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
 
-        function updateDisplay() {
-            const totalAmountElement = document.getElementById('totalAmount');
-            const contributorCountElement = document.getElementById('contributorCount');
-            const progressFill = document.getElementById('progressFill');
-            
-            // Animación del contador
-            const currentAmount = parseInt(totalAmountElement.textContent);
-            const increment = Math.ceil((totalAmount - currentAmount) / 20);
-            
-            if (currentAmount < totalAmount) {
-                totalAmountElement.textContent = Math.min(currentAmount + increment, totalAmount) + '€';
-                setTimeout(updateDisplay, 50);
-            } else {
-                totalAmountElement.textContent = totalAmount + '€';
-            }
-            
-            contributorCountElement.textContent = contributorCount;
-            
-            // Actualizar barra de progreso (objetivo: 200€)
-            const goal = 200;
-            const progressPercentage = Math.min((totalAmount / goal) * 100, 100);
-            progressFill.style.setProperty('--progress-width', progressPercentage + '%');
-        }
-
-        function updateContributorsList() {
-            const contributorsList = document.getElementById('contributorsList');
-            
-            if (contributors.length === 0) {
-                contributorsList.innerHTML = `
-                    <div class="contributors-title">Últimas contribuciones</div>
-                    <div style="color: #64748b; font-style: italic; padding: 20px 0;">
-                        Sé el primero en contribuir
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '<div class="contributors-title">Últimas contribuciones</div>';
-            contributors.slice(0, 5).forEach((contributor, index) => {
-                html += `
-                    <div class="contributor-item" style="animation-delay: ${index * 0.1}s">
-                        <span class="contributor-name">${contributor.donor_name}</span>
-                        <span class="contributor-amount">${contributor.amount}€</span>
-                    </div>
-                `;
-            });
-            
-            contributorsList.innerHTML = html;
-        }
-
-        document.getElementById('donationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('donorName').value;
-            const amount = parseInt(document.getElementById('donationAmount').value);
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (name && amount > 0) {
-                // Deshabilitar botón mientras se procesa
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Procesando...';
-                
-                // Guardar en Supabase
-                const success = await saveDonation(name, amount);
-                
-                if (success) {
-                    closeModal();
-                    
-                    // Recargar donaciones
-                    await loadDonations();
-                    
-                    // Mostrar mensaje de agradecimiento
-                    const button = document.getElementById('addMoneyBtn');
-                    const originalText = button.textContent;
-                    button.textContent = '¡Gracias por tu donación! 🎉';
-                    button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                    
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
-                    }, 3000);
-                }
-                
-                // Rehabilitar botón
-                submitBtn.disabled = false;
-                submitBtn.textContent = '💝 Confirmar donación';
-            }
-        });
-
-        // Cerrar modal al hacer clic fuera
-        window.onclick = function(event) {
-            const modal = document.getElementById('donationModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-
-        // Cargar donaciones al iniciar
-        loadDonations();
+// Cargar donaciones al iniciar
+loadDonations();
     </script>
 </body>
 </html>
