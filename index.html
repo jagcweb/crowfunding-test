@@ -374,7 +374,7 @@
         <div class="hero-icon">💝</div>
         
         <h1 class="title">Crowdfunding para David</h1>
-        <p class="subtitle">Tu ayuda hace la diferencia. Cada contribución cuenta.</p>
+        <p class="subtitle">Aporta tu granito de arena para que David se emborrache en la feria</p>
         
         <div class="amount-display">
             <div class="amount-label">Total recaudado</div>
@@ -445,7 +445,7 @@
                     showError('Error cargando las donaciones');
                     return;
                 }
-
+                console.log('Donaciones cargadas:', data);
                 contributors = data || [];
                 contributorCount = contributors.length;
                 totalAmount = contributors.reduce((sum, contributor) => sum + (contributor.amount || 0), 0);
@@ -460,6 +460,7 @@
 
         // Guardar donación en Supabase
         async function saveDonation(donorName, amount) {
+            console.log('Guardando donación:', { donorName, amount });
             try {
                 const { data, error } = await supabaseClient
                     .from('donations')
