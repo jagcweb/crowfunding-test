@@ -424,8 +424,8 @@
 const SUPABASE_URL = 'https://doenqhcycdergozzazyo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZW5xaGN5Y2RlcmdvenphenlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODU0NTIsImV4cCI6MjA2ODE2MTQ1Mn0.tkbNNXJ87MKC23uGqVY6Rre_7eCDy1tCxKO8FkYn7fY';
 
-// Usa window.Supabase con la v2 de supabase-js por CDN
-const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Usa window.supabase con la v2 de supabase-js por CDN
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let totalAmount = 0;
 let contributors = [];
